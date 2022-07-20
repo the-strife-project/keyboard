@@ -1,9 +1,11 @@
 #include "common.hpp"
 #include <rpc>
 #include <cstdio>
+#include <registry>
 
 char getChar(std::PID client) {
-	IGNORE(client);
+	if(!std::registry::has(client, "KEYBOARD"))
+		return 0;
 
 	wait.take();
 
