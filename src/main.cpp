@@ -25,6 +25,7 @@ extern "C" void _start() {
 	std::in8(KEYBOARD_STATUS_PORT);
 	std::in8(KEYBOARD_DATA_PORT);
 
+	bool shift = false;
 	while(true) {
 		// Poll until there's a key press
 		// This is a monumentally bad idea but I'm running short of time
@@ -35,14 +36,31 @@ extern "C" void _start() {
 			asm volatile("pause");
 		}
 
+		// MODIFIERS
 		uint8_t keycode = std::in8(KEYBOARD_DATA_PORT);
+		switch(keycode) {
+		case LSHIFT_DOWN:
+			shift = true;
+			continue;
+		case LSHIFT_UP:
+			shift = false;
+			continue;
+		case RSHIFT_DOWN:
+			shift = true;
+			continue;
+		case RSHIFT_UP:
+			shift = false;
+			continue;
+		}
+
+		// REGULAR KEYS
 		if(keycode >= 128)
 			continue; // Key release
 
 		if(keycode == 0x0E) {
 			append('\b');
 		} else if(keycode < 0x58) {
-			char c = KB_LAYOUT[keycode];
+			char c = shift ? KB_LAYOUT_SHIFT[keycode] : KB_LAYOUT[keycode];
 			if(c)
 				append(c);
 		}
